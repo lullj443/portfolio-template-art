@@ -1,0 +1,867 @@
+/* ==========================================================================
+   GRADE 1: VANILLA CSS PORTFOLIO DEMO
+   Scroll Architecture with IntersectionObserver + CSS scroll-timeline
+
+   🎓 LEARNING OBJECTIVES:
+   - Master CSS Custom Properties (CSS Variables) for scalable design systems
+   - Understand fluid typography using clamp() for responsive text
+   - Implement scroll-driven animations with modern CSS (no JavaScript!)
+   - Create performant animations using transform and opacity only
+   - Build accessible animations with prefers-reduced-motion
+
+   📚 PREREQUISITES:
+   - CSS basics (selectors, box model, positioning)
+   - Understanding of responsive design concepts
+   - Familiarity with CSS transitions and keyframes
+
+   ⚠️ BROWSER SUPPORT:
+   - CSS scroll-timeline: Chrome 115+, Edge 115+, Firefox 110+ (with flag)
+   - IntersectionObserver: 97%+ browser support (excellent fallback)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+
+   🎓 WHY CUSTOM PROPERTIES?
+   Custom properties (CSS variables) create a single source of truth for your
+   design values. Change one variable, update the entire site. This is the
+   foundation of a design system.
+
+   📐 THE clamp() FUNCTION EXPLAINED:
+   clamp(minimum, preferred, maximum)
+
+   Example: clamp(1rem, 0.9rem + 0.5vw, 1.125rem)
+   - minimum: 1rem (16px) — never smaller than this
+   - preferred: 0.9rem + 0.5vw — scales with viewport width
+   - maximum: 1.125rem (18px) — never larger than this
+
+   The "0.9rem + 0.5vw" creates a fluid value that grows as the viewport
+   widens. The 0.5vw adds responsiveness (0.5% of viewport width).
+
+   🧮 FORMULA FOR FLUID VALUES:
+   preferred = min + (max - min) × (current-vw - min-vw) / (max-vw - min-vw)
+   But clamp() does this automatically! You just set the boundaries.
+   -------------------------------------------------------------------------- */
+:root {
+  /*
+	 * FLUID TYPOGRAPHY SCALE
+	 *
+	 * This creates a harmonious type scale that smoothly adjusts between
+	 * mobile (320px) and desktop (1200px) viewports.
+	 *
+	 * Scale ratio: ~1.125 (Major Second) — subtle but professional
+	 * Each step is roughly 12.5% larger than the previous
+	 */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); /* 12px → 14px */
+  --text-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem); /* 14px → 16px */
+  --text-base: clamp(
+    1rem,
+    0.9rem + 0.5vw,
+    1.125rem
+  ); /* 16px → 18px (body text) */
+  --text-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem); /* 18px → 20px */
+  --text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem); /* 20px → 24px */
+  --text-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem); /* 24px → 32px */
+  --text-3xl: clamp(
+    2rem,
+    1.5rem + 2.5vw,
+    3rem
+  ); /* 32px → 48px (section titles) */
+  --text-4xl: clamp(
+    2.5rem,
+    1.75rem + 3.75vw,
+    4rem
+  ); /* 40px → 64px (hero headline) */
+
+  /*
+	 * FLUID SPACING SCALE
+	 *
+	 * Consistent spacing creates visual rhythm. These values scale
+	 * proportionally with the viewport, maintaining relationships.
+	 *
+	 * Use these for margins, paddings, and gaps — NOT for widths!
+	 */
+  --space-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem); /* 4px → 8px */
+  --space-sm: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem); /* 8px → 12px */
+  --space-md: clamp(1rem, 0.8rem + 1vw, 1.5rem); /* 16px → 24px */
+  --space-lg: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem); /* 24px → 40px */
+  --space-xl: clamp(2rem, 1.5rem + 2.5vw, 4rem); /* 32px → 64px */
+  --space-2xl: clamp(
+    3rem,
+    2rem + 5vw,
+    6rem
+  ); /* 48px → 96px (section padding) */
+
+  /*
+	 * COLOR PALETTE
+	 *
+	 * Dark theme with indigo accent. Limited palette = cohesive design.
+	 * Semantic naming (bg, text, accent) makes colors self-documenting.
+	 */
+  --color-bg: #0f0f0f; /* Near-black background */
+  --color-bg-alt: #1a1a1a; /* Slightly lighter for depth/sections */
+  --color-text: #f5f5f5; /* Off-white for readability (not pure white) */
+  --color-text-muted: #a0a0a0; /* Subdued text for secondary content */
+  --color-accent: #6366f1; /* Indigo — primary brand color */
+  --color-accent-hover: #818cf8; /* Lighter indigo for hover states */
+
+  /*
+	 * ANIMATION TOKENS
+	 *
+	 * Centralizing animation values ensures consistency and makes
+	 * global timing adjustments trivial.
+	 *
+	 * The custom easing curve creates a "gentle landing" effect:
+	 * - Fast start (0.22, 1)
+	 * - Smooth deceleration (0.36, 1)
+	 */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* "Power2.out" equivalent */
+  --duration-normal: 0.6s; /* Default animation duration */
+}
+
+/* --------------------------------------------------------------------------
+   2. CSS RESET & BASE STYLES
+
+   🎓 WHY A CSS RESET?
+   Browsers apply default styles (margins, paddings, fonts) that vary between
+   browsers. A reset creates a consistent baseline so YOUR styles are in control.
+
+   💡 MODERN RESET PHILOSOPHY:
+   We're not removing ALL defaults (like the old "CSS Reset" approach).
+   Instead, we selectively normalize the most problematic differences while
+   keeping useful defaults like list markers in appropriate contexts.
+   -------------------------------------------------------------------------- */
+
+/*
+ * UNIVERSAL BOX-SIZING
+ *
+ * border-box includes padding and border in the element's total width/height.
+ * This makes sizing predictable: a 200px box stays 200px even with padding.
+ *
+ * Without this: width: 200px + padding: 20px = actual width of 240px 😱
+ * With this:    width: 200px + padding: 20px = actual width of 200px ✅
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * SMOOTH SCROLLING
+ *
+ * Native CSS smooth scrolling for anchor links. No JavaScript needed!
+ * This is automatically disabled when prefers-reduced-motion is set.
+ */
+html {
+  scroll-behavior: smooth;
+}
+
+/*
+ * BASE TYPOGRAPHY
+ *
+ * System font stack: Uses the user's OS font for familiarity and performance.
+ * No font files to download = faster page load!
+ *
+ * Line-height 1.6 is optimal for body text readability (1.5-1.7 range).
+ */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  font-size: var(--text-base); /* Uses our fluid typography variable */
+  line-height: 1.6;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+/*
+ * RESPONSIVE IMAGES
+ *
+ * max-width: 100% prevents images from overflowing their containers.
+ * height: auto maintains aspect ratio when width changes.
+ * display: block removes the inline whitespace gap below images.
+ */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/*
+ * LINK RESET
+ *
+ * Inherit color from parent and remove underline by default.
+ * We'll add specific link styles where needed.
+ */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------------------------
+   SKIP LINK (ACCESSIBILITY)
+
+   🎓 WHY SKIP LINKS?
+   Screen reader and keyboard users shouldn't have to tab through the entire
+   navigation on every page. A skip link lets them jump directly to main content.
+
+   The link is hidden off-screen until focused, then slides into view.
+   This is a WCAG 2.1 Level A requirement for accessible navigation.
+   -------------------------------------------------------------------------- */
+.skip-link {
+  position: absolute;
+  top: -100%; /* Hidden above viewport */
+  left: 50%;
+  transform: translateX(-50%); /* Center horizontally */
+  background: var(--color-accent);
+  color: white;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: 0 0 8px 8px; /* Rounded bottom corners only */
+  z-index: 1000; /* Above everything */
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0; /* Slides into view when focused via keyboard */
+}
+
+/* --------------------------------------------------------------------------
+   3. Layout Components
+   -------------------------------------------------------------------------- */
+.container {
+  width: min(90%, 1200px);
+  margin-inline: auto;
+}
+
+.section {
+  padding: var(--space-2xl) 0;
+}
+
+.section-title {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  margin-bottom: var(--space-xl);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   4. Navigation
+   -------------------------------------------------------------------------- */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(15, 15, 15, 0.9);
+  backdrop-filter: blur(10px);
+  padding: var(--space-md) 0;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(90%, 1200px);
+  margin-inline: auto;
+}
+
+.nav-logo {
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.nav-links {
+  display: flex;
+  gap: var(--space-lg);
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--color-text-muted);
+  transition: color 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a:focus {
+  color: var(--color-accent);
+}
+
+/* --------------------------------------------------------------------------
+   5. Hero Section
+   -------------------------------------------------------------------------- */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  z-index: -1;
+}
+
+/* --------------------------------------------------------------------------
+   CSS SCROLL-DRIVEN ANIMATIONS (MODERN PARALLAX)
+
+   🎓 THE FUTURE OF SCROLL ANIMATIONS:
+   CSS scroll-driven animations let you tie animations directly to scroll
+   position — NO JAVASCRIPT REQUIRED! This is more performant than JS-based
+   solutions because the browser handles everything on the compositor thread.
+
+   📐 HOW IT WORKS:
+   1. animation-timeline: scroll(root) — links animation to scroll progress
+   2. animation-range: 0% 100% — animation plays from 0% to 100% scroll
+   3. The @keyframes define what happens at start (0%) and end (100%) of scroll
+
+   ⚠️ BROWSER SUPPORT:
+   This only works in Chrome 115+, Edge 115+. We use @supports to detect it
+   and provide a fallback for other browsers.
+
+   🔗 LEARN MORE: https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timeline
+   -------------------------------------------------------------------------- */
+@supports (animation-timeline: scroll()) {
+  .parallax-bg {
+    /*
+		 * SCROLL-LINKED ANIMATION
+		 *
+		 * - animation: parallaxShift — name of keyframes to use
+		 * - linear — no easing, direct 1:1 scroll mapping
+		 * - both — applies styles before and after animation
+		 */
+    animation: parallaxShift linear both;
+
+    /*
+		 * SCROLL TIMELINE
+		 *
+		 * scroll(root) = scroll progress of the root scroller (usually <html>)
+		 * Could also use scroll(nearest) for a scrollable container
+		 */
+    animation-timeline: scroll(root);
+
+    /*
+		 * ANIMATION RANGE
+		 *
+		 * 0% 100% = animation runs from top of page to bottom
+		 * You could use "entry 0% entry 100%" for element-specific triggers
+		 */
+    animation-range: 0% 100%;
+  }
+
+  @keyframes parallaxShift {
+    /*
+		 * PARALLAX EFFECT
+		 *
+		 * As user scrolls down:
+		 * - Background moves UP (negative translateY) — creates depth illusion
+		 * - Background scales UP slightly — adds visual interest
+		 *
+		 * -15% is subtle; -30% would be more dramatic but potentially nauseating
+		 */
+    from {
+      transform: translateY(0) scale(1);
+    }
+    to {
+      transform: translateY(-15%) scale(1.1);
+    }
+  }
+}
+
+/*
+ * FALLBACK FOR OLDER BROWSERS
+ *
+ * @supports not (animation-timeline: scroll()) targets browsers that DON'T
+ * support scroll-timeline. We give them a simpler parallax effect using
+ * background-attachment: fixed (works everywhere but has performance costs).
+ */
+@supports not (animation-timeline: scroll()) {
+  .parallax-bg {
+    background-attachment: fixed; /* Classic parallax technique */
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: var(--text-4xl);
+  font-weight: 800;
+  margin-bottom: var(--space-sm);
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-size: var(--text-xl);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: var(--space-xl);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.scroll-arrow {
+  width: 24px;
+  height: 24px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: rotate(45deg) translateY(0);
+  }
+  40% {
+    transform: rotate(45deg) translateY(10px);
+  }
+  60% {
+    transform: rotate(45deg) translateY(5px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. Button
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-block;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-accent);
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.btn:hover,
+.btn:focus {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   7. About Section
+   -------------------------------------------------------------------------- */
+.about {
+  background: var(--color-bg-alt);
+}
+
+.about-grid {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+@media (min-width: 768px) {
+  .about-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.about-text p {
+  margin-bottom: var(--space-md);
+  color: var(--color-text-muted);
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.skill-card {
+  background: var(--color-bg);
+  padding: var(--space-md);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.skill-icon {
+  font-size: var(--text-2xl);
+  display: block;
+  margin-bottom: var(--space-sm);
+}
+
+.skill-card h3 {
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.skill-bar {
+  height: 6px;
+  background: var(--color-bg-alt);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.skill-fill {
+  height: 100%;
+  width: 0;
+  background: var(--color-accent);
+  border-radius: 3px;
+  transition: width 1s var(--ease-out) 0.3s;
+}
+
+/* Animate skill bars when revealed */
+[data-reveal-stagger].revealed .skill-fill {
+  width: var(--fill);
+}
+
+/* --------------------------------------------------------------------------
+   8. Projects Section
+   -------------------------------------------------------------------------- */
+.projects-grid {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 640px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .projects-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.project-card {
+  background: var(--color-bg-alt);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.project-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.project-image {
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+
+.project-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.project-card:hover .project-image img {
+  transform: scale(1.05);
+}
+
+.project-content {
+  padding: var(--space-md);
+}
+
+.project-content h3 {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.project-content p {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.project-tags {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.project-tags span {
+  font-size: var(--text-xs);
+  padding: 4px 8px;
+  background: var(--color-bg);
+  border-radius: 4px;
+  color: var(--color-accent);
+}
+
+/* --------------------------------------------------------------------------
+   9. Contact Section
+   -------------------------------------------------------------------------- */
+.contact {
+  background: var(--color-bg-alt);
+  text-align: center;
+}
+
+.contact-content p {
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+.social-links a {
+  color: var(--color-text-muted);
+  transition: color 0.3s;
+}
+
+.social-links a:hover {
+  color: var(--color-accent);
+}
+
+/* --------------------------------------------------------------------------
+   10. Footer
+   -------------------------------------------------------------------------- */
+.footer {
+  padding: var(--space-lg) 0;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.footer .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back-to-top {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-alt);
+  border-radius: 50%;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.back-to-top:hover {
+  background: var(--color-accent);
+  transform: translateY(-3px);
+}
+
+/* --------------------------------------------------------------------------
+   11. SCROLL REVEAL ANIMATIONS (IntersectionObserver-driven)
+
+   🎓 THE CSS + JAVASCRIPT PARTNERSHIP:
+   The JavaScript IntersectionObserver (in main.js) adds classes when elements
+   enter the viewport. CSS handles the actual animation via transitions.
+
+   This separation of concerns is powerful:
+   - JS: "When should the animation start?" (viewport detection)
+   - CSS: "How should the animation look?" (visual effects)
+
+   📐 THE PATTERN:
+   1. Elements start with opacity: 0 and transform: translateY(30px)
+   2. JavaScript adds .visible class when element enters viewport
+   3. CSS transitions smoothly animate to opacity: 1 and translateY(0)
+
+   ⚡ PERFORMANCE NOTE:
+   We ONLY animate `transform` and `opacity` because these properties:
+   - Don't trigger layout recalculation (expensive!)
+   - Don't trigger repaint (also expensive!)
+   - Run on the GPU compositor thread (fast! 60fps!)
+
+   NEVER animate: width, height, margin, padding, top, left, etc.
+   These trigger layout and will cause jank (stuttering).
+   -------------------------------------------------------------------------- */
+
+/*
+ * SINGLE ELEMENT REVEAL
+ *
+ * Use class="animate-on-scroll" on any element you want to fade in.
+ * JavaScript will add .visible when it scrolls into view.
+ */
+.animate-on-scroll {
+  opacity: 0; /* Start invisible */
+  transform: translateY(30px); /* Start 30px below final position */
+
+  /*
+	 * TRANSITION SHORTHAND EXPANDED:
+	 *
+	 * transition: [property] [duration] [timing-function]
+	 *
+	 * We're transitioning TWO properties (opacity AND transform).
+	 * Both use var(--duration-normal) = 0.6s
+	 * Both use var(--ease-out) = our custom easing curve
+	 */
+  transition: opacity var(--duration-normal) var(--ease-out),
+    transform var(--duration-normal) var(--ease-out);
+}
+
+.animate-on-scroll.visible {
+  opacity: 1; /* Fade in */
+  transform: translateY(0); /* Move to final position */
+}
+
+/* --------------------------------------------------------------------------
+   STAGGERED REVEAL ANIMATION
+
+   🎓 WHAT IS STAGGERING?
+   Staggering means animating children elements one after another instead of
+   all at once. This creates a "cascade" or "wave" effect that draws the eye
+   and feels more dynamic than everything appearing simultaneously.
+
+   📐 HOW IT WORKS:
+   1. Parent has [data-reveal-stagger] attribute
+   2. All children start invisible (opacity: 0, translateY)
+   3. When parent gets .revealed class, children animate with increasing delays
+   4. transition-delay creates the stagger: 0.1s, 0.2s, 0.3s, etc.
+
+   💡 DATA ATTRIBUTES:
+   We use data-* attributes instead of classes because:
+   - They're semantic: "this element reveals with stagger"
+   - They can hold values: data-stagger-delay="0.2s" (future enhancement)
+   - They're easily queryable: [data-reveal-stagger]
+   -------------------------------------------------------------------------- */
+[data-reveal-stagger] > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+}
+
+/*
+ * STAGGER DELAYS USING :nth-child
+ *
+ * Each child gets a progressively longer delay.
+ * Child 1: 0.1s delay, Child 2: 0.2s delay, etc.
+ *
+ * This creates the "wave" effect as elements appear one by one.
+ *
+ * ⚠️ LIMITATION: This only works for up to 6 children. For dynamic
+ * content with unknown child count, you'd need JavaScript to set delays.
+ */
+[data-reveal-stagger].revealed > *:nth-child(1) {
+  transition-delay: 0.1s;
+}
+[data-reveal-stagger].revealed > *:nth-child(2) {
+  transition-delay: 0.2s;
+}
+[data-reveal-stagger].revealed > *:nth-child(3) {
+  transition-delay: 0.3s;
+}
+[data-reveal-stagger].revealed > *:nth-child(4) {
+  transition-delay: 0.4s;
+}
+[data-reveal-stagger].revealed > *:nth-child(5) {
+  transition-delay: 0.5s;
+}
+[data-reveal-stagger].revealed > *:nth-child(6) {
+  transition-delay: 0.6s;
+}
+
+[data-reveal-stagger].revealed > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   12. ACCESSIBILITY: REDUCED MOTION
+
+   🎓 WHY THIS MATTERS:
+   Some users experience motion sickness, vestibular disorders, or seizures
+   triggered by animations. Others simply find motion distracting.
+
+   The `prefers-reduced-motion` media query respects user preferences set in
+   their operating system settings:
+   - macOS: System Preferences → Accessibility → Display → Reduce motion
+   - Windows: Settings → Ease of Access → Display → Show animations
+   - iOS: Settings → Accessibility → Motion → Reduce Motion
+
+   ⚖️ LEGAL REQUIREMENT:
+   WCAG 2.1 Success Criterion 2.3.3 requires respecting user motion preferences.
+   Ignoring this can expose you to accessibility lawsuits.
+
+   📐 OUR APPROACH:
+   When reduced motion is preferred, we:
+   1. Disable ALL animations and transitions (near-instant 0.01ms)
+   2. Make animated elements immediately visible (no waiting)
+   3. Disable smooth scrolling (instant jumps instead)
+
+   💡 WHY 0.01ms INSTEAD OF 0ms?
+   Some browsers have bugs with 0ms duration. 0.01ms is effectively instant
+   but avoids those edge cases.
+
+   🔗 LEARN MORE: https://web.dev/prefers-reduced-motion/
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  /*
+	 * NUCLEAR OPTION: Disable ALL animations/transitions globally
+	 *
+	 * The !important ensures this overrides any other animation styles.
+	 * This is one of the few legitimate uses of !important.
+	 */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important; /* Instant scroll, no smooth */
+  }
+
+  /*
+	 * ENSURE ANIMATED CONTENT IS VISIBLE
+	 *
+	 * Without this, elements with opacity: 0 would stay invisible forever
+	 * since the animation that reveals them is now disabled.
+	 */
+  .animate-on-scroll,
+  [data-reveal-stagger] > * {
+    opacity: 1; /* Fully visible */
+    transform: none; /* No transform offset */
+  }
+
+  /*
+	 * SKILL BARS: Show at full width immediately
+	 */
+  .skill-fill {
+    width: var(--fill);
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   13. Mobile Adjustments
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .nav-links {
+    display: none; /* Would be hamburger menu in production */
+  }
+
+  .footer .container {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+}
