@@ -50,9 +50,9 @@
   --line-height-3xl: clamp(1.3rem, 1.5vw + 1.4em, 1.7rem);
 
   /* ===== TYPOGRAPHY ===== */
-  --font-sans: "Montserrat", sans-serif;
-  --font-serif: "Andada ht", serif;
-  --font-mono: "Fira Code", monospace;
+  --font-sans: "nunito sans", sans-serif;
+  --font-serif: "inknut antiqua", serif;
+  --font-mono: "inconsolata", monospace;
 
   /* ===== COLOR DEFINITIONS FOR TAILWIND ===== */
   /*

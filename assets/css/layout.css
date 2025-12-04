@@ -3,7 +3,6 @@
    -------------------------------------------------------------------------- */
 .container {
   width: min(90%, 1200px);
-  margin-inline: auto;
 }
 
 .section {
@@ -12,7 +11,7 @@
 
 .section-title {
   font-size: var(--text-3xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-xl);
   text-align: center;
 }
@@ -123,7 +122,7 @@
 
 .hero-title {
   font-size: var(--text-4xl);
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
   margin-bottom: var(--space-sm);
   letter-spacing: -0.02em;
 }
