@@ -11,3 +11,10 @@
   backdrop-filter: blur(10px);
   padding: var(--gap) 0;
 }
+.navlink {
+  color: var(--color-foreground);
+  text-decoration: none;
+  margin: 0 var(--gap);
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
