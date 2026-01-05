@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------------------
-   3. Layout Components
+   . Layout Components
    -------------------------------------------------------------------------- */
 .container {
   width: min(90%, 1200px);
@@ -17,82 +17,105 @@
 }
 
 /* --------------------------------------------------------------------------
-   5. Hero Section
+   . Hero Section
    -------------------------------------------------------------------------- */
+
+body {
+  font-family: serif;
+  background: white;
+}
+
+/* HERO */
 .hero {
   position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  height: 100svh;
+  width: 100%;
   overflow: hidden;
 }
 
-.hero-bg {
+/* BLUE CENTER TEXT (locked) */
+.hero-center {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  z-index: -1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.hero-centerh1 {
+  color: #0a32ff;
+  font-size: var(--text-9xl);
+  line-height: 1.05;
+  text-align: center;
+  font-weight: var(--font-weight-bold);
+}
+
+.hero-centerspan1 {
+  display: block;
+  font-style: var(--font-style-italic);
+}
+
+.hero-centerspan2 {
+  display: block;
+}
+.hero-centerspan3 {
+  display: block;
+}
+
+/* BLACK MOVING PHRASES */
+.phrase {
+  position: absolute;
+  color: black;
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  font-family: cursive;
+  white-space: nowrap;
+}
+
+.top-left {
+  top: clamp(1rem, 4vw, 3rem);
+  left: clamp(1rem, 6vw, 4rem);
+}
+
+.bottom-right {
+  bottom: clamp(1rem, 4vw, 3rem);
+  right: clamp(1rem, 6vw, 4rem);
+}
+
+/* SCROLL HINT */
+.scroll-hint {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+/* NEXT SECTION */
+#about {
+  min-height: 100vh;
+  padding: 4rem;
 }
 
 /* --------------------------------------------------------------------------
-   CSS SCROLL-DRIVEN ANIMATIONS (MODERN PARALLAX)
-
-   🎓 THE FUTURE OF SCROLL ANIMATIONS:
-   CSS scroll-driven animations let you tie animations directly to scroll
-   position — NO JAVASCRIPT REQUIRED! This is more performant than JS-based
-   solutions because the browser handles everything on the compositor thread.
-
-   📐 HOW IT WORKS:
-   1. animation-timeline: scroll(root) — links animation to scroll progress
-   2. animation-range: 0% 100% — animation plays from 0% to 100% scroll
-   3. The @keyframes define what happens at start (0%) and end (100%) of scroll
-
-   ⚠️ BROWSER SUPPORT:
-   This only works in Chrome 115+, Edge 115+. We use @supports to detect it
-   and provide a fallback for other browsers.
-
-   🔗 LEARN MORE: https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timeline
+   . Cursor
    -------------------------------------------------------------------------- */
-@supports (animation-timeline: scroll()) {
-  .parallax-bg {
-    /*
-		 * SCROLL-LINKED ANIMATION
-		 *
-		 * - animation: parallaxShift — name of keyframes to use
-		 * - linear — no easing, direct 1:1 scroll mapping
-		 * - both — applies styles before and after animation
-		 */
-    animation: parallaxShift linear both;
-
-    /*
-		 * SCROLL TIMELINE
-		 *
-		 * scroll(root) = scroll progress of the root scroller (usually <html>)
-		 * Could also use scroll(nearest) for a scrollable container
-		 */
-    animation-timeline: scroll(root);
-
-    /*
-		 * ANIMATION RANGE
-		 *
-		 * 0% 100% = animation runs from top of page to bottom
-		 * You could use "entry 0% entry 100%" for element-specific triggers
-		 */
-    animation-range: 0% 100%;
-  }
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0022ff; /* image-matching blue */
+  mix-blend-mode: difference; /* see-through inversion */
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s ease, height 0.2s ease;
 }
 
-/*
- * FALLBACK FOR OLDER BROWSERS
- *
- * @supports not (animation-timeline: scroll()) targets browsers that DON'T
- * support scroll-timeline. We give them a simpler parallax effect using
- * background-attachment: fixed (works everywhere but has performance costs).
- */
-@supports not (animation-timeline: scroll()) {
-  .parallax-bg {
-    background-attachment: fixed; /* Classic parallax technique */
-  }
+.cursor.hover {
+  width: 56px;
+  height: 56px;
 }

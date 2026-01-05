@@ -374,3 +374,41 @@ window.cleanupScrollObservers = () => {
   staggerObserver.disconnect();
   console.log("🧹 Observers cleaned up");
 };
+
+// ==========================================================================
+// . MOUSE CURSOR
+// ==========================================================================
+
+window.addEventListener("mousemove", (e) => {
+  cursor.style.left = `${e.clientX}px`;
+  cursor.style.top = `${e.clientY}px`;
+});
+
+/* cursor hover grow */
+const hoverables = document.querySelectorAll("a, button, .hover");
+
+hoverables.forEach((el) => {
+  el.addEventListener("mouseenter", () => cursor.classList.add("hover"));
+  el.addEventListener("mouseleave", () => cursor.classList.remove("hover"));
+});
+
+// ==========================================================================
+// . HERO SECTION CLICK & SCROLL
+// ==========================================================================
+
+const hero = document.querySelector(".hero");
+const target = document.querySelector("#about");
+
+hero.addEventListener("click", () => {
+  target.scrollIntoView({ behavior: "smooth" });
+});
+
+window.addEventListener(
+  "wheel",
+  (e) => {
+    if (window.scrollY === 0 && e.deltaY > 0) {
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+  },
+  { once: true }
+);
