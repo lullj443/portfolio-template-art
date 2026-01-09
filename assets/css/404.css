@@ -59,7 +59,7 @@ body {
   animation: float-up 2.6s ease-in forwards;
   animation-delay: 2s;
   pointer-events: none;
-  padding-top: var(--space-10xl);
+  padding-top: 11rem;
 }
 
 /* buttons */
