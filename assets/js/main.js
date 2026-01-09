@@ -191,87 +191,6 @@ function initScrollAnimations() {
 }
 
 // ==========================================================================
-// 3. SMOOTH SCROLL FOR ANCHOR LINKS
-// ==========================================================================
-
-/**
- * Enhanced smooth scrolling for in-page navigation.
- *
- * 🎓 WHY NOT JUST USE CSS scroll-behavior: smooth?
- * CSS smooth scrolling works great, but it has limitations:
- * 1. Can't account for fixed header height
- * 2. Can't update URL without page jump
- * 3. Less control over timing/easing
- *
- * This JavaScript approach gives us full control while still being simple.
- *
- * 📐 THE PATTERN:
- * 1. Find all links starting with "#" (anchor links)
- * 2. On click, prevent default jump behavior
- * 3. Calculate target position accounting for fixed nav height
- * 4. Smoothly scroll to that position
- * 5. Update URL for bookmarking/sharing
- */
-function initSmoothScroll() {
-  // Select all anchor links (href starts with "#")
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener("click", (e) => {
-      const targetId = anchor.getAttribute("href");
-
-      // Ignore links that are just "#" (often used for JavaScript triggers)
-      if (targetId === "#") return;
-
-      const target = document.querySelector(targetId);
-      if (target) {
-        // Prevent the default "jump to anchor" behavior
-        e.preventDefault();
-
-        /**
-         * CALCULATE SCROLL POSITION
-         *
-         * We need to account for the fixed navigation bar, otherwise
-         * the target would be hidden behind it.
-         *
-         * getBoundingClientRect().top = distance from viewport top
-         * window.scrollY = how far page is already scrolled
-         * navHeight = height of fixed nav to offset
-         */
-        const navHeight = document.querySelector(".nav")?.offsetHeight || 0;
-        const targetPosition =
-          target.getBoundingClientRect().top + window.scrollY - navHeight;
-
-        /**
-         * SCROLL WITH SMOOTH BEHAVIOR
-         *
-         * window.scrollTo() with behavior: 'smooth' animates the scroll.
-         * This is supported in all modern browsers.
-         *
-         * Note: CSS scroll-behavior: smooth on <html> provides a fallback
-         * for browsers where this JS might fail.
-         */
-        window.scrollTo({
-          top: targetPosition,
-          behavior: "smooth",
-        });
-
-        /**
-         * UPDATE URL WITHOUT PAGE RELOAD
-         *
-         * history.pushState() changes the URL in the address bar
-         * without triggering a page reload or scroll jump.
-         *
-         * This means:
-         * - Users can bookmark specific sections
-         * - Sharing the URL goes to the right section
-         * - Back button works as expected
-         */
-        history.pushState(null, "", targetId);
-      }
-    });
-  });
-}
-
-// ==========================================================================
 // 4. ACTIVE NAVIGATION STATE
 // ==========================================================================
 
@@ -427,9 +346,11 @@ if (!prefersReduced) {
     { threshold: 0.2 }
   );
 
-  document.querySelectorAll(".reveal-group, .blue-box").forEach((el) => {
-    observer.observe(el);
-  });
+  document
+    .querySelectorAll(".reveal-group, .blue-box, .reveal")
+    .forEach((el) => {
+      observer.observe(el);
+    });
 }
 
 // ==========================================================================

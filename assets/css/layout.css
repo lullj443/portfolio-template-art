@@ -4,6 +4,8 @@
 
 .section {
   padding: clamp(2rem, 5vw, 6rem);
+  padding-bottom: clamp(2rem, 5vw, 6rem);
+  scroll-margin-top: 80px;
 }
 
 .flow {
@@ -15,6 +17,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr)); /* 280px */
   gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+/* 5️⃣ ADDED — does nothing unless used */
+.two-col-fixed {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  min-width: 0;
 }
 
 .blue-box {
@@ -91,7 +101,6 @@ body {
   background: var(--color-background);
 }
 
-/* HERO */
 .hero {
   position: relative;
   height: 100svh;
@@ -100,7 +109,6 @@ body {
   padding: clamp(2rem, 4vw, 6rem);
 }
 
-/* BLUE CENTER TEXT (locked) */
 .hero-center {
   position: absolute;
   inset: 0;
@@ -124,6 +132,7 @@ body {
 .hero-centerspan2 {
   display: block;
 }
+
 .hero-centerspan3 {
   display: block;
 }
@@ -136,12 +145,12 @@ body {
   .hero-centerspan2 {
     padding-left: var(--space-6xl);
   }
+
   .hero-centerspan3 {
     padding-right: var(--space-4xl);
   }
 }
 
-/* BLACK MOVING PHRASES */
 .phrase {
   position: absolute;
   color: var(--color-foreground);
@@ -164,28 +173,23 @@ body {
    . About Section
    -------------------------------------------------------------------------- */
 
+/* 1️⃣ FIXED */
 .about-img {
-  width: 25rem;
+  width: 100%;
+  max-width: 45rem;
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 1.5rem;
 }
 
 /* --------------------------------------------------------------------------
-   . Experience Section
-   -------------------------------------------------------------------------- */
-
-.two-col {
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); /* 320px */
-}
-
-/* --------------------------------------------------------------------------
    . Skills Section
    -------------------------------------------------------------------------- */
 
+/* 2️⃣ FIXED */
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); /* 240px */
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 }
 
 .skill span {
@@ -193,8 +197,9 @@ body {
   margin-bottom: 0.5rem;
 }
 
+/* 3️⃣ FIXED — margin-left removed */
 .skill .bar {
-  height: 0.625rem; /* 10px */
+  height: 0.625rem;
   background: rgba(255, 255, 255, 0.25);
   border-radius: 62.4375rem;
   overflow: hidden;
@@ -209,20 +214,29 @@ body {
   background: white;
   border-radius: inherit;
 }
+
 /* --------------------------------------------------------------------------
    . Images Section
    -------------------------------------------------------------------------- */
 
+/* 4️⃣ FIXED — grid-item wrapper added */
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16.25rem, 1fr)); /* 260px */
+  grid-template-columns: repeat(auto-fit, minmax(16.25rem, 1fr));
   gap: 1.5rem;
 }
 
-.grid-img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+.grid-item {
+  height: 22rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   border-radius: 1.5rem;
-  cursor: pointer;
+}
+
+.grid-item img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
 }
