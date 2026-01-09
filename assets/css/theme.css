@@ -1,5 +1,6 @@
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 /* --------------------------------------------------------------------------
    1. CSS CUSTOM PROPERTIES (DESIGN TOKENS)

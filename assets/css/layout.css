@@ -4,7 +4,12 @@
 
 .section {
   padding: clamp(2rem, 5vw, 6rem);
-  padding-bottom: clamp(2rem, 5vw, 6rem);
+  padding-bottom: 0;
+  scroll-margin-top: 80px;
+}
+
+.sectionend {
+  padding: clamp(2rem, 5vw, 6rem);
   scroll-margin-top: 80px;
 }
 
@@ -124,6 +129,15 @@ body {
   line-height: var(--line-height-12xl);
 }
 
+.hero-centerh1 span {
+  letter-spacing: 0;
+  transition: letter-spacing 0.4s ease;
+}
+
+.hero-centerh1 span:hover {
+  letter-spacing: 0.5rem;
+}
+
 .hero-centerspan1 {
   display: block;
   font-style: var(--font-style-italic);
@@ -222,12 +236,13 @@ body {
 /* 4️⃣ FIXED — grid-item wrapper added */
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16.25rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
   gap: 1.5rem;
+  padding-top: var(--space-md);
 }
 
 .grid-item {
-  height: 22rem;
+  height: 30rem;
   display: flex;
   align-items: center;
   justify-content: center;

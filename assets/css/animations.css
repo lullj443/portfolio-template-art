@@ -12,14 +12,14 @@
   transform: translateY(1.25rem);
 }
 
-.reveal-inner {
-  animation-delay: 1s;
-}
-
 .revealed {
   opacity: 1;
   transform: translateY(0);
   transition: opacity 1s ease, transform 1s ease;
+}
+
+.reveal-inner.revealed {
+  transition-delay: 1s;
 }
 
 .blue-box.revealed {
