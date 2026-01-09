@@ -26,7 +26,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2xl);
+  gap: var(--space-lg);
   text-align: center;
 }
 
@@ -42,7 +42,7 @@ body {
 .numbers {
   display: flex;
   align-items: center;
-  gap: var(--space-lg);
+  gap: var(--space-md);
 }
 
 .four {
@@ -53,13 +53,13 @@ body {
 
 /* balloon */
 .balloon {
-  width: 10.7rem; /* 171px */
-  height: 30.1rem; /* 481px */
+  width: auto; /* 171px */
+  height: clamp(16rem, 40vw, 30.1rem); /* 481px */
   object-fit: contain;
   animation: float-up 2.6s ease-in forwards;
-  animation-delay: 2s;
+  animation-delay: 1.5s;
   pointer-events: none;
-  padding-top: 11rem;
+  padding-top: clamp(6rem, 14.5vw, 11rem);
 }
 
 /* buttons */
@@ -97,32 +97,5 @@ body {
 @keyframes float-up {
   to {
     transform: translateY(-120vh);
-  }
-}
-
-/* ===== DESKTOP LAYOUT ===== */
-@media (min-width: 1100px) {
-  .layout {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-3xl);
-    text-align: left;
-  }
-
-  .handwriting {
-    font-size: var(--text-4xl);
-    max-width: 16rem;
-  }
-
-  .numbers {
-    gap: var(--space-xl);
-  }
-
-  .four {
-    font-size: var(--text-9xl);
-  }
-
-  .actions {
-    max-width: 24rem;
   }
 }
