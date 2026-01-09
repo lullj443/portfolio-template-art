@@ -316,7 +316,7 @@ function initActiveNav() {
         navLinks.forEach((link) => {
           link.style.color =
             link.getAttribute("href") === `#${id}`
-              ? "var(--color-accent)" // Highlighted color
+              ? "var(--color-primary)" // Highlighted color
               : ""; // Reset to default (inherits from CSS)
         });
       }
@@ -376,39 +376,76 @@ window.cleanupScrollObservers = () => {
 };
 
 // ==========================================================================
-// . MOUSE CURSOR
+// . NAV BAR
 // ==========================================================================
 
-window.addEventListener("mousemove", (e) => {
-  cursor.style.left = `${e.clientX}px`;
-  cursor.style.top = `${e.clientY}px`;
+const hamburger = document.getElementById("hamburger");
+const navLinks = document.getElementById("navLinks");
+
+hamburger.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
 });
 
-/* cursor hover grow */
-const hoverables = document.querySelectorAll("a, button, .hover");
+const dropdownToggle = document.querySelector(".dropdown-toggle");
+const dropdown = document.querySelector(".dropdown");
 
-hoverables.forEach((el) => {
-  el.addEventListener("mouseenter", () => cursor.classList.add("hover"));
-  el.addEventListener("mouseleave", () => cursor.classList.remove("hover"));
+dropdownToggle.addEventListener("click", (e) => {
+  if (window.innerWidth < 950) {
+    e.preventDefault();
+    dropdown.classList.toggle("open");
+  }
 });
 
 // ==========================================================================
-// . HERO SECTION CLICK & SCROLL
+// . IntersectionObserver + cascade logic
 // ==========================================================================
 
-const hero = document.querySelector(".hero");
-const target = document.querySelector("#about");
+const prefersReduced = window.matchMedia(
+  "(prefers-reduced-motion: reduce)"
+).matches;
 
-hero.addEventListener("click", () => {
-  target.scrollIntoView({ behavior: "smooth" });
+if (!prefersReduced) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        const children = entry.target.querySelectorAll(
+          ".reveal, .reveal-inner"
+        );
+
+        children.forEach((el, i) => {
+          setTimeout(() => {
+            el.classList.add("revealed");
+          }, i * 80);
+        });
+
+        entry.target.classList.add("revealed");
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.2 }
+  );
+
+  document.querySelectorAll(".reveal-group, .blue-box").forEach((el) => {
+    observer.observe(el);
+  });
+}
+
+// ==========================================================================
+// . Skill bar fill animation
+// ==========================================================================
+
+document.querySelectorAll(".skill").forEach((skill) => {
+  const level = skill.style.getPropertyValue("--level");
+  const bar = skill.querySelector("i");
+
+  skill.addEventListener(
+    "transitionend",
+    () => {
+      bar.style.width = level + "%";
+      bar.style.transition = "width 1s ease";
+    },
+    { once: true }
+  );
 });
-
-window.addEventListener(
-  "wheel",
-  (e) => {
-    if (window.scrollY === 0 && e.deltaY > 0) {
-      target.scrollIntoView({ behavior: "smooth" });
-    }
-  },
-  { once: true }
-);

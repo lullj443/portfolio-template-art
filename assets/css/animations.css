@@ -1,0 +1,23 @@
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.reveal,
+.reveal-inner {
+  opacity: 0;
+  transform: translateY(1.25rem); /* 20px */
+}
+
+.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.blue-box.revealed {
+  transform: scaleX(1);
+  transition: transform 0.8s ease;
+}
